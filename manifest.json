@@ -1,0 +1,14 @@
+{
+    "display_name": "思维链注入 (CoT Injection)",
+    "loading_order": 15,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Xeltra",
+    "version": "1.0.0",
+    "homePage": "https://github.com/Xeltra233/cot-injection",
+    "hooks": {
+        "activate": "init"
+    }
+}

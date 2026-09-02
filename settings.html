@@ -1,0 +1,124 @@
+<div id="cot_injection_settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <div class="flex-container alignitemscenter margin0">
+                <i class="fa-solid fa-brain margin-right-5" style="color: #60a5fa;"></i>
+                <b data-i18n="cot_inj_title">思维链注入与逻辑断点续接 (CoT Injection)</b>
+            </div>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <div id="cotInjectionDrawerContents" class="cot-injection-panel">
+                <!-- 原理与使用说明提示卡片 -->
+                <div class="cot-injection-info-card">
+                    <div class="cot-injection-info-header">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>原理解析与跨协议适配说明</span>
+                    </div>
+                    <div class="cot-injection-info-body">
+                        <p class="margin-bottom-5">
+                            <b>1. 规避 Gemini 400 报错：</b>Google Gemini 等闭源大模型不支持原生 Assistant Prefill（末尾为 assistant 消息会报错 <code>400 Invalid Argument</code>）。本插件采用标准化 <code>User(当前问题) → Assistant(预设思维链草稿) → User(下一轮提示词)</code> 请求序列，实现全模型通用的思维干预与断点接力。
+                        </p>
+                        <p class="margin-bottom-5">
+                            <b>2. 多协议端点支持：</b>支持灵活选择 <b>OpenAI、Anthropic (Claude)、Google Gemini (原生/中转)</b> 及 <b>智能自动识别 (Auto)</b>，不同协议会自动对齐 <code>role (assistant/model)</code> 与 <code>content / parts</code> 字段规范。
+                        </p>
+                        <p class="margin-bottom-5">
+                            <b>3. 预设与宏变量处理说明：</b><span class="cot-highlight">下一轮用户提示词及思维链草稿均会被酒馆预设与宏系统自动解析处理</span>，完整支持 <code>{{user}}</code>、<code>{{char}}</code>、<code>{{model}}</code> 等动态宏替换。
+                        </p>
+                        <p class="margin0">
+                            <b>4. 后端静默处理与当前轮结果补充：</b>新一轮对话在发送请求时由后端静默构造，<b>不会在前端聊天记录中插入虚假的对话卡片</b>。模型返回的续接结果将直接补充到当前轮次，注入的思维链作为当前消息的折叠思考过程展示。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 开关控制区（实时生效，无需手动保存） -->
+                <div class="cot-section-box">
+                    <div class="flex-container justifyspacebetween alignitemscenter margin-bottom-5">
+                        <label class="checkbox_label cot-main-toggle" for="cot_injection_enabled" title="点击开关立即实时生效，无需点击保存">
+                            <input id="cot_injection_enabled" type="checkbox" />
+                            <span class="cot-toggle-text"><b>启用思维链注入 (Enable CoT Injection)</b></span>
+                        </label>
+                        <span id="cot_injection_status_badge" class="cot-badge cot-badge-disabled">已停用</span>
+                    </div>
+                    <div class="flex-container alignitemscenter">
+                        <label class="checkbox_label" for="cot_injection_single_shot" title="点击开关立即实时生效：触发一次生成后自动关闭插件开关，避免影响后续常规对话">
+                            <input id="cot_injection_single_shot" type="checkbox" />
+                            <span>单次生效模式 (Single-shot: 生成后自动关闭)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- API 端点协议格式选择区 -->
+                <div class="cot-section-box">
+                    <label for="cot_injection_api_format" class="cot-field-label margin-bottom-5">
+                        <i class="fa-solid fa-network-wired margin-right-5" style="color: #38bdf8;"></i>
+                        <b>API 端点协议格式 (Endpoint Protocol Format)</b>
+                    </label>
+                    <select id="cot_injection_api_format" class="text_pole">
+                        <option value="auto">自动识别 / Auto Detect (推荐：根据当前连接智能适配)</option>
+                        <option value="openai">OpenAI 兼容协议 (Chat Completions: role 'assistant', content)</option>
+                        <option value="gemini">Google Gemini 协议 (支持 role 'model' 与 parts/content 结构)</option>
+                        <option value="anthropic">Anthropic 协议 (Claude Messages: role 'assistant')</option>
+                    </select>
+                    <small class="cot-hint-text">
+                        <i class="fa-solid fa-circle-nodes margin-right-5"></i>选择后，下方实时预览将同步切换为对应协议的 Payload 请求结构。
+                    </small>
+                </div>
+
+                <!-- 思维链配置区 -->
+                <div class="cot-section-box">
+                    <div class="flex-container justifyspacebetween alignitemscenter margin-bottom-5">
+                        <label for="cot_injection_thought" class="cot-field-label">
+                            <i class="fa-solid fa-lightbulb margin-right-5" style="color: #f59e0b;"></i>
+                            <b>预设思维链 / 阶段推导草稿 (Assistant CoT Draft)</b>
+                        </label>
+                        <div class="flex-container gap-5">
+                            <div id="cot_clear_thought_btn" class="menu_button margin0 cot-mini-btn" title="清空思维链内容">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>清空</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <textarea id="cot_injection_thought" class="text_pole textarea_compact cot-textarea" rows="7" placeholder="输入阶段推导分析、核心假设或已完成的中间计算过程...&#10;支持 {{user}}、{{char}} 等酒馆宏替换。&#10;末尾建议使用未完结的前向断点句式（例如：3. 接下来需要执行的关键步骤/最终计算是：）"></textarea>
+                </div>
+
+                <!-- 下一轮用户提示词配置区 -->
+                <div class="cot-section-box">
+                    <label for="cot_injection_next_prompt" class="cot-field-label margin-bottom-5">
+                        <i class="fa-solid fa-user-tag margin-right-5" style="color: #10b981;"></i>
+                        <b>下一轮用户提示词 (Next Round User Trigger Prompt)</b>
+                    </label>
+                    <div class="cot-input-wrapper">
+                        <input id="cot_injection_next_prompt" type="text" class="text_pole cot-grey-placeholder" placeholder="例如：继续" />
+                    </div>
+                    <small class="cot-hint-text">
+                        <i class="fa-solid fa-asterisk margin-right-5"></i>提示：留空时将默认使用 <code>继续</code>。提示词在发送时将由酒馆宏引擎自动处理。
+                    </small>
+                </div>
+
+                <!-- 保存按钮与操作栏 -->
+                <div class="cot-section-box cot-actions-box">
+                    <div class="flex-container justifyspacebetween alignitemscenter">
+                        <div id="cot_save_settings_btn" class="menu_button menu_button_icon margin0 cot-save-btn" title="保存上方输入的协议格式、思维链内容和提示词配置">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>保存配置 (Save Settings)</span>
+                        </div>
+                        <div id="cot_refresh_preview_btn" class="menu_button menu_button_icon margin0 cot-mini-btn" title="刷新下方请求结构预览">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>刷新预览</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时宏预览与状态查看 -->
+                <div class="cot-section-box cot-preview-box">
+                    <span class="cot-preview-title"><i class="fa-solid fa-eye margin-right-5"></i>选定协议下的实时请求结构预览：</span>
+                    <div id="cot_injection_preview_content" class="cot-preview-code">
+                        (正在准备预览...)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
