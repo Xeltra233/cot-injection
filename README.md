@@ -57,8 +57,7 @@
 ```bash
 git clone https://github.com/Xeltra233/cot-injection.git public/scripts/extensions/third-party/cot-injection
 ```
-或直接放置于 `public/scripts/extensions/cot-injection`，重启 SillyTavern 即可。
-
+刷新或重启 SillyTavern 即可。
 ---
 
 ## 🛠️ 配置与使用说明

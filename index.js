@@ -1,4 +1,4 @@
-import { extension_settings, renderExtensionTemplateAsync, getContext } from '../../extensions.js';
+import { extension_settings, renderExtensionTemplateAsync, getContext } from '../../../extensions.js';
 import {
     eventSource,
     event_types,
@@ -7,10 +7,10 @@ import {
     chat,
     updateMessageBlock,
     saveChatConditional,
-} from '../../../script.js';
-import { SlashCommandParser } from '../../slash-commands/SlashCommandParser.js';
-import { SlashCommand } from '../../slash-commands/SlashCommand.js';
-import { SlashCommandArgument, SlashCommandNamedArgument, ARGUMENT_TYPE } from '../../slash-commands/SlashCommandArgument.js';
+} from '../../../../script.js';
+import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
+import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
+import { SlashCommandArgument, SlashCommandNamedArgument, ARGUMENT_TYPE } from '../../../slash-commands/SlashCommandArgument.js';
 
 export { MODULE_NAME };
 
@@ -423,7 +423,18 @@ export async function init() {
     console.info('CoT Injection: 正在初始化思维链注入扩展...');
 
     try {
-        const settingsHtml = await renderExtensionTemplateAsync(MODULE_NAME, 'settings');
+        const isThirdParty = import.meta.url.includes('third-party');
+        const extName = isThirdParty ? `third-party/${MODULE_NAME}` : MODULE_NAME;
+        let settingsHtml;
+        try {
+            settingsHtml = await renderExtensionTemplateAsync(extName, 'settings');
+        } catch (templateErr) {
+            console.warn('CoT Injection: 尝试加载 ' + extName + ' 模板失败，回退尝试:', templateErr);
+            settingsHtml = await renderExtensionTemplateAsync(MODULE_NAME, 'settings');
+        }
+        if (!settingsHtml && isThirdParty) {
+            settingsHtml = await renderExtensionTemplateAsync(MODULE_NAME, 'settings');
+        }
 
         // 查找或创建容器
         let container = $('#cot_injection_container');
