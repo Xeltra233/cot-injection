@@ -23,7 +23,7 @@
                             <b>2. 多协议端点支持：</b>支持灵活选择 <b>OpenAI、Anthropic (Claude)、Google Gemini (原生/中转)</b> 及 <b>智能自动识别 (Auto)</b>，不同协议会自动对齐 <code>role (assistant/model)</code> 与 <code>content / parts</code> 字段规范。
                         </p>
                         <p class="margin-bottom-5">
-                            <b>3. 预设与宏变量处理说明：</b><span class="cot-highlight">下一轮用户提示词及思维链草稿均会被酒馆预设与宏系统自动解析处理</span>，完整支持 <code>{{user}}</code>、<code>{{char}}</code>、<code>{{model}}</code> 等动态宏替换。
+                            <b>3. 预设与宏变量处理说明：</b><span class="cot-highlight">下一轮用户提示词及思维链草稿均会被酒馆预设与宏系统自动解析处理</span>，完整支持 <code>\{{user}}</code>、<code>\{{char}}</code>、<code>\{{model}}</code> 等动态宏替换。
                         </p>
                         <p class="margin0">
                             <b>4. 后端静默处理与当前轮结果补充：</b>新一轮对话在发送请求时由后端静默构造，<b>不会在前端聊天记录中插入虚假的对话卡片</b>。模型返回的续接结果将直接补充到当前轮次，注入的思维链作为当前消息的折叠思考过程展示。
@@ -80,7 +80,7 @@
                         </div>
                     </div>
 
-                    <textarea id="cot_injection_thought" class="text_pole textarea_compact cot-textarea" rows="7" placeholder="输入阶段推导分析、核心假设或已完成的中间计算过程...&#10;支持 {{user}}、{{char}} 等酒馆宏替换。&#10;末尾建议使用未完结的前向断点句式（例如：3. 接下来需要执行的关键步骤/最终计算是：）"></textarea>
+                    <textarea id="cot_injection_thought" class="text_pole textarea_compact cot-textarea" rows="7" placeholder="输入阶段推导分析、核心假设或已完成的中间计算过程...&#10;支持 \{{user}}、\{{char}} 等酒馆宏替换。&#10;末尾建议使用未完结的前向断点句式（例如：3. 接下来需要执行的关键步骤/最终计算是：）"></textarea>
                 </div>
 
                 <!-- 下一轮用户提示词配置区 -->
